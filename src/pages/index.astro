@@ -1,11 +1,134 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import * as scheduleData from "../data.json";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const sortedSchedule = scheduleData.schedule.sort(
+  (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+);
+
+// Get unique dates for the date picker
+const uniqueDates = sortedSchedule
+  .filter((day) => !day.endDate) // Exclude multi-day events from navigation
+  .map((day) => day.date);
 ---
 
 <Layout>
-	<Welcome />
+  <main class="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div class="sticky top-0 z-10 bg-white/80 backdrop-blur-sm shadow-md">
+      <div class="container mx-auto px-4 py-4">
+        <header class="text-center mb-6">
+          <h1 class="text-4xl font-bold text-orange-600 mb-2">
+            {scheduleData.festivalName}
+          </h1>
+          <p class="text-xl text-gray-600">{scheduleData.tagline}</p>
+        </header>
+
+        <!-- Date Navigation -->
+        <div class="overflow-x-auto pb-2">
+          <div class="flex gap-2 min-w-max justify-center">
+            {
+              uniqueDates.map((date) => (
+                <a
+                  href={`#${date}`}
+                  class="px-4 py-2 rounded-full bg-orange-100 hover:bg-orange-200 transition-colors text-orange-800 text-sm font-medium"
+                >
+                  {new Date(date).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="container mx-auto px-4 py-8 space-y-8">
+      {/* Multi-day events section */}
+      <div class="bg-orange-50 rounded-xl p-6 shadow-sm">
+        <h2 class="text-xl font-semibold mb-4 text-orange-800">
+          Special Events
+        </h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {
+            sortedSchedule
+              .filter((day) => day.endDate)
+              .map((day) => (
+                <div class="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div class="text-sm font-medium text-orange-600 mb-2">
+                    {new Date(day.date).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    {" - "}
+                    {new Date(day.endDate).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </div>
+                  {day.events.map((event) => (
+                    <div class="mb-2 last:mb-0">
+                      <h3 class="font-medium">{event.name}</h3>
+                      <div class="text-sm text-gray-600">
+                        {event.venue && <span>📍 {event.venue}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))
+          }
+        </div>
+      </div>
+
+      {/* Daily events section */}
+      {
+        sortedSchedule
+          .filter((day) => !day.endDate)
+          .map((day) => (
+            <div id={day.date} class="scroll-mt-40">
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-2xl font-semibold mb-6 text-orange-800">
+                  {new Date(day.date).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </h2>
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {day.events.map((event) => (
+                    <div class="relative group">
+                      <div class="absolute -inset-0.5 bg-gradient-to-r from-orange-600 to-red-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-200" />
+                      <div class="relative bg-white rounded-lg p-4">
+                        <h3 class="font-medium text-lg mb-2">{event.name}</h3>
+                        <div class="space-y-1 text-gray-600">
+                          {event.time && (
+                            <div class="flex items-center gap-1">
+                              <span class="text-orange-500">🕒</span>
+                              <span>{event.time}</span>
+                            </div>
+                          )}
+                          {event.venue && (
+                            <div class="flex items-center gap-1">
+                              <span class="text-orange-500">📍</span>
+                              <span>{event.venue}</span>
+                            </div>
+                          )}
+                          {event.note && (
+                            <p class="text-sm text-gray-500 mt-2 italic">
+                              Note: {event.note}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))
+      }
+    </section>
+  </main>
 </Layout>
