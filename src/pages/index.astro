@@ -56,6 +56,20 @@ const serializedVenues = JSON.stringify(venues);
 const serializedVenueCoordinates = JSON.stringify(venueCoordinates);
 const serializedDefaultDate = JSON.stringify(defaultDate);
 const serializedToday = JSON.stringify(today);
+
+// Get all events for search
+const allEvents = dailySchedule.flatMap((day) =>
+  day.events.map((event) => ({
+    ...event,
+    date: day.date,
+    formattedDate: new Date(day.date).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    }),
+  }))
+);
+const serializedAllEvents = JSON.stringify(allEvents);
 ---
 
 <Layout>
@@ -71,6 +85,21 @@ const serializedToday = JSON.stringify(today);
           </h1>
           <p class="text-sm text-gray-600">{scheduleData.tagline}</p>
         </header>
+
+        {/* Search Bar */}
+        <div class="mb-6 relative">
+          <input
+            type="search"
+            id="eventSearch"
+            placeholder="Search events, venues..."
+            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-colors"
+          />
+          <div
+            id="searchResults"
+            class="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-100 max-h-96 overflow-y-auto hidden z-10"
+          >
+          </div>
+        </div>
 
         {/* Date Navigation */}
         <div class="mb-6 flex gap-2 overflow-x-auto pb-2">
@@ -159,6 +188,7 @@ const serializedToday = JSON.stringify(today);
       serializedVenueCoordinates,
       serializedDefaultDate,
       serializedToday,
+      serializedAllEvents,
     }}
   >
     const cebuLatLng = { lat: 10.3157, lng: 123.8854 }; // Cebu City center
@@ -166,9 +196,96 @@ const serializedToday = JSON.stringify(today);
     const venueCoordinates = JSON.parse(serializedVenueCoordinates);
     const defaultDate = JSON.parse(serializedDefaultDate);
     const today = JSON.parse(serializedToday);
+    const allEvents = JSON.parse(serializedAllEvents);
     let map;
     let markers = {};
     let activeInfoWindow = null;
+
+    // Setup search functionality
+    function setupSearch() {
+      const searchInput = document.getElementById("eventSearch");
+      const searchResults = document.getElementById("searchResults");
+      let searchTimeout;
+
+      searchInput.addEventListener("input", (e) => {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.toLowerCase();
+
+        // Hide results if query is empty
+        if (!query) {
+          searchResults.classList.add("hidden");
+          return;
+        }
+
+        searchTimeout = setTimeout(() => {
+          const results = allEvents.filter(
+            (event) =>
+              event.name.toLowerCase().includes(query) ||
+              (event.venue && event.venue.toLowerCase().includes(query))
+          );
+
+          if (results.length > 0) {
+            searchResults.innerHTML = results
+              .slice(0, 10) // Limit to 10 results
+              .map(
+                (event) => `
+                  <button
+                    onclick="handleSearchResult('${event.date}', '${event.venue}')"
+                    class="w-full text-left px-4 py-3 hover:bg-orange-50 border-b last:border-0 transition-colors"
+                  >
+                    <p class="font-medium text-gray-900">${event.name}</p>
+                    <div class="text-sm text-gray-600">
+                      ${event.formattedDate}
+                      ${event.venue ? ` • ${event.venue}` : ""}
+                    </div>
+                  </button>
+                `
+              )
+              .join("");
+            searchResults.classList.remove("hidden");
+          } else {
+            searchResults.innerHTML = `
+              <div class="px-4 py-3 text-gray-500">
+                No results found
+              </div>
+            `;
+            searchResults.classList.remove("hidden");
+          }
+        }, 300);
+      });
+
+      // Close search results when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !searchInput.contains(e.target) &&
+          !searchResults.contains(e.target)
+        ) {
+          searchResults.classList.add("hidden");
+        }
+      });
+
+      // Clear search when pressing Escape
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          searchInput.value = "";
+          searchResults.classList.add("hidden");
+        }
+      });
+    }
+
+    function handleSearchResult(date, venue) {
+      // Hide search results
+      document.getElementById("searchResults").classList.add("hidden");
+      document.getElementById("eventSearch").value = "";
+
+      // Switch to the correct date
+      scrollToDay(date);
+
+      // If venue exists, center map on it
+      if (venue && venue !== "To be announced" && venue !== "TBA") {
+        setTimeout(() => centerMapOnVenue(venue), 500);
+      }
+    }
 
     function initMap() {
       map = new google.maps.Map(document.getElementById("map"), {
@@ -236,6 +353,9 @@ const serializedToday = JSON.stringify(today);
       if (todayButton) {
         todayButton.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
+
+      // Setup search after map is initialized
+      setupSearch();
     }
 
     function centerMapOnVenue(venueName) {
@@ -327,6 +447,7 @@ const serializedToday = JSON.stringify(today);
     window.initMap = initMap;
     window.centerMapOnVenue = centerMapOnVenue;
     window.scrollToDay = scrollToDay;
+    window.handleSearchResult = handleSearchResult;
   </script>
 
   <script
