@@ -55,6 +55,7 @@ const venues = [
 const serializedVenues = JSON.stringify(venues);
 const serializedVenueCoordinates = JSON.stringify(venueCoordinates);
 const serializedDefaultDate = JSON.stringify(defaultDate);
+const serializedToday = JSON.stringify(today);
 ---
 
 <Layout>
@@ -82,11 +83,15 @@ const serializedDefaultDate = JSON.stringify(defaultDate);
                     : "bg-orange-100 hover:bg-orange-200 text-orange-900"
                 }`}
                 onclick={`scrollToDay('${day.date}')`}
+                data-date={day.date}
               >
                 {new Date(day.date).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                 })}
+                {day.date === today && (
+                  <span class="ml-1 text-xs font-medium">(Today)</span>
+                )}
               </button>
             ))
           }
@@ -102,12 +107,17 @@ const serializedDefaultDate = JSON.stringify(defaultDate);
                   day.date !== defaultDate ? "hidden" : ""
                 }`}
               >
-                <h2 class="text-lg font-semibold text-orange-800 mb-3">
+                <h2 class="text-lg font-semibold text-orange-800 mb-3 flex items-center justify-between">
                   {new Date(day.date).toLocaleDateString("en-US", {
                     weekday: "long",
                     month: "long",
                     day: "numeric",
                   })}
+                  {day.date === today && (
+                    <span class="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                      Today
+                    </span>
+                  )}
                 </h2>
                 <div class="space-y-3">
                   {day.events.map((event) => (
@@ -148,12 +158,14 @@ const serializedDefaultDate = JSON.stringify(defaultDate);
       serializedVenues,
       serializedVenueCoordinates,
       serializedDefaultDate,
+      serializedToday,
     }}
   >
     const cebuLatLng = { lat: 10.3157, lng: 123.8854 }; // Cebu City center
     const venuesData = JSON.parse(serializedVenues);
     const venueCoordinates = JSON.parse(serializedVenueCoordinates);
     const defaultDate = JSON.parse(serializedDefaultDate);
+    const today = JSON.parse(serializedToday);
     let map;
     let markers = {};
     let activeInfoWindow = null;
@@ -216,6 +228,14 @@ const serializedDefaultDate = JSON.stringify(defaultDate);
         bounds.extend(marker.getPosition());
       });
       map.fitBounds(bounds);
+
+      // Auto-scroll to today's section if it exists
+      const todayButton = document.querySelector(
+        `button[data-date="${today}"]`
+      );
+      if (todayButton) {
+        todayButton.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     }
 
     function centerMapOnVenue(venueName) {
@@ -258,6 +278,26 @@ const serializedDefaultDate = JSON.stringify(defaultDate);
       document.querySelectorAll('[id^="2025-"]').forEach((el) => {
         el.classList.add("hidden");
       });
+
+      // Update active button state
+      document.querySelectorAll("button[data-date]").forEach((btn) => {
+        if (btn.dataset.date === date) {
+          btn.classList.remove(
+            "bg-orange-100",
+            "hover:bg-orange-200",
+            "text-orange-900"
+          );
+          btn.classList.add("bg-orange-500", "text-white");
+        } else {
+          btn.classList.remove("bg-orange-500", "text-white");
+          btn.classList.add(
+            "bg-orange-100",
+            "hover:bg-orange-200",
+            "text-orange-900"
+          );
+        }
+      });
+
       // Show selected date section
       const element = document.getElementById(date);
       if (element) {
