@@ -6,6 +6,18 @@ import { venueCoordinates } from "../data/locations";
 
 const GITHUB_REPO = "https://github.com/dorelljames/sinulog-festival";
 
+// SEO metadata
+const title =
+  "Sinulog 2025 Schedule of Activities | Interactive Map and Events";
+const description = `Complete schedule for Sinulog Festival 2025 (${new Date(
+  "2025-01-10"
+).toLocaleDateString("en-US", { month: "long", day: "numeric" })} - ${new Date(
+  "2025-01-19"
+).toLocaleDateString("en-US", {
+  month: "long",
+  day: "numeric",
+})}). Find event locations, times, and details for Cebu's grandest festival.`;
+
 const sortedSchedule = scheduleData.schedule.sort(
   (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
 );
@@ -74,7 +86,7 @@ const allEvents = dailySchedule.flatMap((day) =>
 const serializedAllEvents = JSON.stringify(allEvents);
 ---
 
-<Layout>
+<Layout title={title} description={description}>
   {/* GitHub Corner */}
   <a
     href={GITHUB_REPO}
@@ -115,6 +127,16 @@ const serializedAllEvents = JSON.stringify(allEvents);
             {scheduleData.festivalName}
           </h1>
           <p class="text-sm text-gray-600">{scheduleData.tagline}</p>
+          <p class="mt-2 text-xs text-gray-500">
+            Data courtesy of <a
+              href="https://sinulogfestival.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-orange-600 hover:text-orange-700 underline"
+            >
+              sinulogfestival.com
+            </a>
+          </p>
         </header>
 
         {/* Search Bar */}

@@ -1,0 +1,101 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalURL?: string;
+}
+
+// Helper function to safely create URLs
+function createUrl(path: string, base?: URL | string): string {
+  try {
+    return new URL(path, base).href;
+  } catch (e) {
+    return path;
+  }
+}
+
+const {
+  title = "Sinulog 2025 Schedule",
+  description = "Complete schedule of activities for Sinulog Festival 2025 in Cebu City. Find events, locations, and timings for the grandest festival in the Philippines.",
+  image = "/sinulog-og-image.jpg", // Make sure to add this image to public folder
+  canonicalURL = createUrl(Astro.url.pathname, Astro.site),
+} = Astro.props;
+
+const imageUrl = createUrl(image, Astro.site);
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageUrl} />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalURL} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={imageUrl} />
+
+<!-- Additional Meta Tags -->
+<meta name="theme-color" content="#fd7e14" />
+<meta name="keywords" content="Sinulog 2025, Cebu Festival, Sinulog Schedule, Pit Senyor, Cebu Events, Cultural Festival, Religious Festival, Philippine Festival" />
+<meta name="author" content="Dorell James" />
+<meta name="robots" content="index, follow" />
+
+<!-- Preload Fonts -->
+<link
+  rel="preload"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+  as="style"
+  onload="this.onload=null;this.rel='stylesheet'"
+/>
+
+<!-- Schema.org for Google -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "Sinulog Festival 2025",
+    "description": "Annual cultural and religious festival in Cebu City, Philippines",
+    "startDate": "2025-01-10",
+    "endDate": "2025-01-19",
+    "location": {
+      "@type": "Place",
+      "name": "Cebu City",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Cebu City",
+        "addressRegion": "Cebu",
+        "addressCountry": "PH"
+      }
+    },
+    "image": [imageUrl],
+    "offers": {
+      "@type": "Offer",
+      "url": canonicalURL,
+      "availability": "https://schema.org/InStock"
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": "Sinulog Foundation, Inc.",
+      "url": "https://sinulog.ph"
+    }
+  }
+</script> 
