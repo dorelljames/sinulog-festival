@@ -1,0 +1,21 @@
+export const venueCoordinates: Record<string, { lat: number; lng: number }> = {
+  "SM Seaside Cebu": { lat: 10.2751, lng: 123.8535 },
+  GMall: { lat: 10.3142, lng: 123.8913 },
+  "Basilica del Sto. Nino": { lat: 10.2933, lng: 123.9017 },
+  "Basilica Pilgrim Center": { lat: 10.2934, lng: 123.9019 },
+  "Cebu City Sports Center": { lat: 10.2998, lng: 123.8957 },
+  "Fuente Osmeña": { lat: 10.3089, lng: 123.8914 },
+  "Plaza Independencia": { lat: 10.2925, lng: 123.9054 },
+  "SM City Cebu": { lat: 10.3119, lng: 123.9178 },
+  "Pacific Grand Ballroom, Waterfront Cebu City Hotel & Casino": {
+    lat: 10.3152,
+    lng: 123.9161,
+  },
+  "MCIAA T1": { lat: 10.3089, lng: 123.9789 },
+  "The Terraces, Ayala Center": { lat: 10.3187, lng: 123.9044 },
+  "Mandaue City": { lat: 10.3231, lng: 123.9399 },
+  "Nustar Convention Center": { lat: 10.2919, lng: 123.9066 },
+  SRP: { lat: 10.2672, lng: 123.8691 },
+  "Basilica Minore del Sto. Niño": { lat: 10.2933, lng: 123.9017 },
+  "Ayala Center Cebu": { lat: 10.3187, lng: 123.9044 },
+};
